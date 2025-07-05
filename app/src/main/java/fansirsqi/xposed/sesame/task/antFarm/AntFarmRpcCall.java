@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.UUID;
 
+import fansirsqi.xposed.sesame.data.Status;
 import fansirsqi.xposed.sesame.hook.RequestManager;
 import fansirsqi.xposed.sesame.util.RandomUtil;
 
@@ -54,8 +55,8 @@ public class AntFarmRpcCall {
 
     // 一起拿小鸡饲料
     public static String letsGetChickenFeedTogether() {
-        String args1 = "[{\"needHasInviteUserByCycle\":\"true\",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM_P2P\",\"source\":\"ANTFARM\",\"startIndex\":0," +
-                "\"version\":\"" + VERSION + "\"}]";
+        String args1 = "[{\"needHasInviteUserByCycle\":\"true\",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM_P2P\",\"source\":\"ANTFARM\",\"startIndex\":0," + "\"version\":\"" + VERSION + "\"}]";
+        String args = "[{\"needHasInviteUserByCycle\":true,\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM_FAMILY_SHARE\",\"source\":\"ANTFARM\",\"startIndex\":0}]";
         return RequestManager.requestString("com.alipay.antiep.canInvitePersonListP2P", args1);
     }
 
@@ -236,6 +237,7 @@ public class AntFarmRpcCall {
         args.put("source", "chInfo_ch_appcenter__chsub_9patch");
         args.put("version", VERSION);
         String params = "[" + args + "]";
+
         return RequestManager.requestString("com.alipay.antfarm.feedFriendAnimal", params);
     }
 
@@ -337,17 +339,28 @@ public class AntFarmRpcCall {
         }
     }
 
-    /* 小鸡厨房 */
-    public static String enterKitchen(String userId) {
-        return RequestManager.requestString("com.alipay.antfarm.enterKitchen",
-                "[{\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"userId\":\""
-                        + userId + "\",\"version\":\"unknown\"}]");
+
+    /**
+     * 小鸡厨房 - 进厨房
+     *
+     * @param userId 用户id
+     * @return 返回结果
+     * @throws JSONException 异常
+     */
+    public static String enterKitchen(String userId) throws JSONException {
+        JSONObject args = new JSONObject();
+        args.put("requestType", "RPC");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", "VILLA");
+        args.put("userId", userId);
+        args.put("version", "unknown");
+        String params = "[" + args + "]";
+        return RequestManager.requestString("com.alipay.antfarm.enterKitchen", params);
     }
 
     public static String collectDailyFoodMaterial(int dailyFoodMaterialAmount) {
         return RequestManager.requestString("com.alipay.antfarm.collectDailyFoodMaterial",
-                "[{\"collectDailyFoodMaterialAmount\":" + dailyFoodMaterialAmount
-                        + ",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"version\":\"unknown\"}]");
+                "[{\"collectDailyFoodMaterialAmount\":" + dailyFoodMaterialAmount + ",\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"VILLA\",\"version\":\"unknown\"}]");
     }
 
     public static String queryFoodMaterialPack() {
@@ -366,10 +379,24 @@ public class AntFarmRpcCall {
                 "[{\"collect\":true,\"requestType\":\"RPC\",\"sceneCode\":\"ORCHARD\",\"source\":\"VILLA\",\"version\":\"unknown\"}]");
     }
 
-    public static String cook(String userId) {
-        return RequestManager.requestString("com.alipay.antfarm.cook",
-                "[{\"requestType\":\"RPC\",\"sceneCode\":\"ANTFARM\",\"source\":\"antfarmzuofanrw\",\"userId\":\""
-                        + userId + "\",\"version\":\"unknown\"}]");
+    /**
+     * 小鸡厨房 - 做菜
+     *
+     * @param userId
+     * @param source
+     * @return
+     * @throws JSONException
+     */
+    public static String cook(String userId, String source) throws JSONException {
+//[{"requestType":"RPC","sceneCode":"ANTFARM","source":"VILLA","userId":"2088522730162798","version":"unknown"}]
+        JSONObject args = new JSONObject();
+        args.put("requestType", "RPC");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", source);
+        args.put("userId", userId);
+        args.put("version", "unknown");
+        String params = "[" + args + "]";
+        return RequestManager.requestString("com.alipay.antfarm.cook", params);
     }
 
     public static String useFarmFood(String cookbookId, String cuisineId) {
@@ -578,7 +605,7 @@ public class AntFarmRpcCall {
 
     // 亲密家庭
     public static String enterFamily() {
-        String args = "[{\"fromAnn\":false,\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\"}]";
+        String args = "[{\"fromAnn\":false,\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\",\"timeZoneId\":\"Asia/Shanghai\"}]";
         return RequestManager.requestString("com.alipay.antfarm.enterFamily", args);
     }
 
@@ -617,9 +644,30 @@ public class AntFarmRpcCall {
         return RequestManager.requestString("com.alipay.antfarm.DeliverContentExpand", args);
     }
 
-    public static String deliverMsgSend(String groupId, JSONArray friendUserIdList, String content, String deliverId) {
-        String args = "[{\"requestType\":\"NORMAL\",\"sceneCode\":\"ANTFARM\",\"source\":\"H5\", \"friendUserIds\":" + friendUserIdList + ",\"mode\":\"AI\",\"spaceType\":\"ChickFamily\",\"groupId\":\"" + groupId + "\",\"content\":\"" + content + "\",\"deliverId\":\"" + deliverId + "\"}]";
-        return RequestManager.requestString("com.alipay.antfarm.DeliverMsgSend", args);
+    public static String QueryExpandContent(String deliverId) throws JSONException {
+        JSONObject args = new JSONObject();
+        args.put("requestType", "NORMAL");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", "H5");
+        args.put("deliverId", deliverId);
+        String params = "[{" + args + "}]";
+        return RequestManager.requestString("com.alipay.antfarm.QueryExpandContent", params);
+    }
+
+    public static String deliverMsgSend(String groupId, JSONArray friendUserIds, String content, String deliverId) throws JSONException {
+//        [{"content":"朝霞映照，一日之晨，犹如江湖之始，英雄豪杰，早安！愿你今日行走江湖，剑气如虹，笑傲红尘，自在如风！","deliverId":"17508046530122088902407466501","friendUserIds":["2088222807310171","2088132047085772","2088902977414540","2088022030363513"],"groupId":"0955970009220240918164110504","mode":"AI","requestType":"NORMAL","sceneCode":"ANTFARM","source":"H5","spaceType":"ChickFamily"}]
+        JSONObject args = new JSONObject();
+        args.put("content", content);
+        args.put("deliverId", deliverId);
+        args.put("friendUserIds", friendUserIds);
+        args.put("groupId", groupId);
+        args.put("mode", "AI");
+        args.put("requestType", "NORMAL");
+        args.put("sceneCode", "ANTFARM");
+        args.put("source", "H5");
+        args.put("spaceType", "ChickFamily");
+        String params = "[{" + args + "}]";
+        return RequestManager.requestString("com.alipay.antfarm.DeliverMsgSend", params);
     }
 
     public static String syncFamilyStatus(String groupId, String operType, String syncUserIds) {
